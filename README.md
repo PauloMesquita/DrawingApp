@@ -1,2 +1,3 @@
-# ImageEditor
-An image editor to use in the browser
+## ImageEditor
+
+An simple image editor to use in the browser
