@@ -1,20 +1,37 @@
+import { Feature } from "./features/Feature.js";
+import { Pencil } from "./features/Pencil.js";
+
 window.addEventListener("load", () => {
-  const canvas = new Canvas();
+  const canvas = new Canvas(document.querySelector("#canvas"));
   canvas.run();
 });
 
 class Canvas {
-  constructor() {
-    this.canvas = document.querySelector("#canvas");
+  constructor(canvas) {
+    this.canvas = canvas;
     this.ctx = this.canvas.getContext("2d");
-    this.painting = false;
     this.color = "black";
+    this.features = {
+      pencil: new Feature(this, Pencil),
+    };
   }
 
   run() {
     this.resizeCanvas();
     this.addInfo();
     this.runListeners();
+    this.changeSelectedFeature("pencil");
+  }
+
+  changeSelectedFeature(feature) {
+    this.stopAllFeatures();
+    this.features[feature].start();
+  }
+
+  stopAllFeatures() {
+    Object.keys(this.features).forEach((key) => {
+      this.features[key].stop();
+    });
   }
 
   addInfo() {
@@ -24,9 +41,6 @@ class Canvas {
   runListeners() {
     window.addEventListener("resize", () => this.resizeCanvas());
     document.addEventListener("keydown", this.handleKeyStroke.bind(this));
-    this.canvas.addEventListener("mousedown", this.startDraw.bind(this));
-    this.canvas.addEventListener("mouseup", this.finishDraw.bind(this));
-    this.canvas.addEventListener("mousemove", this.draw.bind(this));
   }
 
   deleteDelMessage() {
@@ -54,33 +68,8 @@ class Canvas {
         this.clear();
       },
     };
+    console.log(e.key);
     if (e.key in commands) commands[e.key]();
-  }
-
-  startDraw(e) {
-    this.painting = true;
-    this.draw(e);
-  }
-
-  finishDraw(e) {
-    this.painting = false;
-    // Reset pencil position
-    this.ctx.beginPath();
-  }
-
-  draw(e) {
-    if (this.painting) {
-      // Line Configs
-      this.ctx.lineWidth = 10;
-      this.ctx.lineCap = "round";
-      this.ctx.strokeStyle = this.color;
-      // Draw
-      this.ctx.lineTo(e.clientX, e.clientY);
-      this.ctx.stroke();
-      // Make less pixelated lines
-      this.ctx.beginPath();
-      this.ctx.moveTo(e.clientX, e.clientY);
-    }
   }
 
   write(text, positionX, positionY, fontSize, font) {
