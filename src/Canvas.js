@@ -3,6 +3,7 @@ import { Pencil } from "./features/Pencil.js";
 import { Line } from "./features/Line.js";
 import { Eraser } from "./features/Eraser.js";
 import { Square } from "./features/Square.js";
+import { Circle } from "./features/Circle.js";
 
 window.addEventListener("load", () => {
   const canvas = new Canvas(document.querySelector("#canvas"));
@@ -19,14 +20,39 @@ class Canvas {
       line: new Feature(this, Line),
       eraser: new Feature(this, Eraser),
       square: new Feature(this, Square),
+      circle: new Feature(this, Circle),
     };
+    this.canvasStates = [];
+    this.undoStates = [];
   }
 
   run() {
     this.changeSelectedFeature("pencil");
     this.resizeCanvas();
     this.addInfo();
+    this.addChange();
     this.runListeners();
+  }
+
+  // State
+  addChange() {
+    this.canvasStates.push(this.createCanvasCopy());
+  }
+
+  undo() {
+    if (this.canvasStates.length > 1) {
+      const lastState = this.canvasStates.pop();
+      this.undoStates.push(lastState);
+    }
+    this.replaceCanvas(this.canvasStates[this.canvasStates.length - 1]);
+  }
+
+  redo() {
+    if (this.undoStates.length > 0) {
+      const lastUndo = this.undoStates.pop();
+      this.canvasStates.push(lastUndo);
+    }
+    this.replaceCanvas(this.canvasStates[this.canvasStates.length - 1]);
   }
 
   // Features
@@ -88,6 +114,17 @@ class Canvas {
       Delete: () => {
         this.clear();
         this.addInfo();
+        this.addChange();
+      },
+      z: () => {
+        if (e.ctrlKey) {
+          this.undo();
+        }
+      },
+      y: () => {
+        if (e.ctrlKey) {
+          this.redo();
+        }
       },
       0: () => {
         this.unselectedFeature();
@@ -108,6 +145,10 @@ class Canvas {
         this.changeSelectedFeature("square");
         this.reloadInfo();
       },
+      5: () => {
+        this.changeSelectedFeature("circle");
+        this.reloadInfo();
+      },
     };
     if (e.key in commands) commands[e.key]();
   }
@@ -116,6 +157,11 @@ class Canvas {
   write(text, positionX, positionY, fontSize, font) {
     this.ctx.font = `${fontSize}px ${font}`;
     this.ctx.fillText(text, positionX, positionY);
+  }
+
+  replaceCanvas(canvas) {
+    this.clear();
+    this.ctx.drawImage(canvas, 0, 0);
   }
 
   clear() {
@@ -138,6 +184,6 @@ class Canvas {
     this.canvas.height = window.innerHeight;
     this.canvas.width = window.innerWidth;
 
-    this.ctx.drawImage(canvasCopy, 0, 0);
+    this.replaceCanvas(canvasCopy);
   }
 }
