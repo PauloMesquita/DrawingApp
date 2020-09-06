@@ -4,8 +4,11 @@ export class Feature {
     this.canvasObject = canvas;
     this.canvas = this.canvasObject.canvas;
     this.startDrawFunction = this.feature.startDraw.bind(this.feature);
-    this.finishDrawFunction = this.feature.finishDraw.bind(this.feature);
     this.drawFunction = this.feature.draw.bind(this.feature);
+    this.finishDrawFunction = () => {
+      this.feature.finishDraw();
+      this.canvasObject.addChange();
+    };
   }
 
   start() {
