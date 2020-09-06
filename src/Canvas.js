@@ -114,7 +114,6 @@ class Canvas {
       Delete: () => {
         this.clear();
         this.addInfo();
-        this.addChange();
       },
       z: () => {
         if (e.ctrlKey) {
