@@ -2,6 +2,7 @@ import { Feature } from "./features/Feature.js";
 import { Pencil } from "./features/Pencil.js";
 import { Line } from "./features/Line.js";
 import { Eraser } from "./features/Eraser.js";
+import { Square } from "./features/Square.js";
 
 window.addEventListener("load", () => {
   const canvas = new Canvas(document.querySelector("#canvas"));
@@ -17,6 +18,7 @@ class Canvas {
       pencil: new Feature(this, Pencil),
       line: new Feature(this, Line),
       eraser: new Feature(this, Eraser),
+      square: new Feature(this, Square),
     };
   }
 
@@ -100,6 +102,10 @@ class Canvas {
       },
       3: () => {
         this.changeSelectedFeature("eraser");
+        this.reloadInfo();
+      },
+      4: () => {
+        this.changeSelectedFeature("square");
         this.reloadInfo();
       },
     };

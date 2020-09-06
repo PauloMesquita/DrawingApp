@@ -1,4 +1,4 @@
-export class Line {
+export class Square {
   constructor(canvasObject) {
     this.canvasObject = canvasObject;
     this.ctx = canvasObject.ctx;
@@ -31,10 +31,12 @@ export class Line {
       this.ctx.lineCap = "round";
       this.ctx.strokeStyle = this.canvasObject.color;
       // Draw
-      this.ctx.beginPath();
-      this.ctx.moveTo(this.startX, this.startY);
-      this.ctx.lineTo(e.clientX, e.clientY);
-      this.ctx.stroke();
+      this.ctx.strokeRect(
+        this.startX,
+        this.startY,
+        e.clientX - this.startX,
+        e.clientY - this.startY
+      );
     }
   }
 }
