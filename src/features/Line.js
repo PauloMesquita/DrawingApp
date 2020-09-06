@@ -30,7 +30,6 @@ export class Line {
       this.ctx.beginPath();
       this.ctx.moveTo(this.startX, this.startY);
       this.ctx.lineTo(e.clientX, e.clientY);
-      console.log(this.startX, this.startY, e.clientX, e.clientY);
       this.ctx.stroke();
     }
   }
