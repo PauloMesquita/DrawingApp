@@ -1,5 +1,6 @@
 import { Feature } from "./features/Feature.js";
 import { Pencil } from "./features/Pencil.js";
+import { Line } from "./features/Line.js";
 
 window.addEventListener("load", () => {
   const canvas = new Canvas(document.querySelector("#canvas"));
@@ -13,65 +14,93 @@ class Canvas {
     this.color = "black";
     this.features = {
       pencil: new Feature(this, Pencil),
+      line: new Feature(this, Line),
     };
   }
 
   run() {
+    this.changeSelectedFeature("pencil");
     this.resizeCanvas();
     this.addInfo();
     this.runListeners();
-    this.changeSelectedFeature("pencil");
   }
 
+  // Features
   changeSelectedFeature(feature) {
-    this.stopAllFeatures();
-    this.features[feature].start();
+    this.unselectedFeature();
+    this.selectedFeature = feature;
+    this.features[this.selectedFeature].start();
   }
 
-  stopAllFeatures() {
-    Object.keys(this.features).forEach((key) => {
-      this.features[key].stop();
-    });
+  unselectedFeature() {
+    if (this.selectedFeature) this.features[this.selectedFeature].stop();
   }
 
+  //Info
   addInfo() {
     this.writeDelMessage();
   }
 
-  runListeners() {
-    window.addEventListener("resize", () => this.resizeCanvas());
-    document.addEventListener("keydown", this.handleKeyStroke.bind(this));
+  deleteInfo() {
+    this.deleteDelMessage();
+  }
+
+  reloadInfo() {
+    this.deleteInfo();
+    this.addInfo();
   }
 
   deleteDelMessage() {
     this.ctx.clearRect(
-      this.canvas.width - 250,
+      this.canvas.width - 300,
       this.canvas.height - 40,
-      250,
+      400,
       40
     );
   }
 
   writeDelMessage() {
     this.write(
-      "Press DEL to erase",
-      this.canvas.width - 180,
+      `Press DEL to erase - ${this.selectedFeature}`,
+      this.canvas.width - 250,
       this.canvas.height - 20,
       20,
       "Georgia"
     );
   }
 
+  // Events
+  runListeners() {
+    window.addEventListener("resize", () => {
+      this.deleteInfo();
+      this.resizeCanvas();
+      this.addInfo();
+    });
+    document.addEventListener("keydown", this.handleKeyStroke.bind(this));
+  }
+
   handleKeyStroke(e) {
     const commands = {
       Delete: () => {
         this.clear();
+        this.addInfo();
+      },
+      0: () => {
+        this.unselectedFeature();
+      },
+      1: () => {
+        this.changeSelectedFeature("pencil");
+        this.reloadInfo();
+      },
+      2: () => {
+        this.changeSelectedFeature("line");
+        this.reloadInfo();
       },
     };
-    console.log(e.key);
     if (e.key in commands) commands[e.key]();
   }
 
+  // Canvas draw actions
   write(text, positionX, positionY, fontSize, font) {
     this.ctx.font = `${fontSize}px ${font}`;
     this.ctx.fillText(text, positionX, positionY);
@@ -79,9 +108,9 @@ class Canvas {
 
   clear() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    this.addInfo();
   }
 
+  // Canvas Utils
   createCanvasCopy() {
     const inMemoryCanvas = document.createElement("canvas");
     const inMomeryCtx = inMemoryCanvas.getContext("2d");
@@ -92,14 +121,11 @@ class Canvas {
   }
 
   resizeCanvas() {
-    // Prevent erase when resizing
-    this.deleteDelMessage();
     const canvasCopy = this.createCanvasCopy();
 
     this.canvas.height = window.innerHeight;
     this.canvas.width = window.innerWidth;
 
     this.ctx.drawImage(canvasCopy, 0, 0);
-    this.writeDelMessage();
   }
 }
